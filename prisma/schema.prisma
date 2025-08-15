@@ -1,0 +1,283 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  HR_MANAGER
+  ACCOUNTANT
+  EMPLOYEE
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+  ON_LEAVE
+  TERMINATED
+}
+
+enum WPSStatus {
+  PENDING
+  SUBMITTED
+  APPROVED
+  REJECTED
+  PROCESSED
+}
+
+enum LeaveType {
+  ANNUAL
+  SICK
+  EMERGENCY
+  MATERNITY
+  PATERNITY
+  UNPAID
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model Company {
+  id              String   @id @default(cuid())
+  name            String
+  crNumber        String   @unique // Commercial Registration Number
+  address         String?
+  phone           String?
+  email           String?
+  website         String?
+  logo            String?
+  establishedDate DateTime?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  users       User[]
+  employees   Employee[]
+  departments Department[]
+  payrolls    Payroll[]
+  wpsFiles    WPSFile[]
+  
+  @@map("companies")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String
+  name          String
+  role          UserRole
+  phoneNumber   String?
+  avatar        String?
+  isActive      Boolean  @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Employee profile if user is an employee
+  employeeProfile Employee?
+
+  @@map("users")
+}
+
+model Department {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  employees Employee[]
+
+  @@map("departments")
+}
+
+model Employee {
+  id                String           @id @default(cuid())
+  employeeId        String           @unique // Company-specific employee ID
+  qatarId           String?          // Qatar ID
+  passportNumber    String?
+  name              String
+  email             String           @unique
+  phoneNumber       String?
+  dateOfBirth       DateTime
+  gender            String           // MALE, FEMALE
+  nationality       String
+  maritalStatus     String?          // SINGLE, MARRIED, DIVORCED, WIDOWED
+  address           String?
+  joinDate          DateTime
+  contractStartDate DateTime
+  contractEndDate   DateTime?
+  status            EmployeeStatus   @default(ACTIVE)
+  position          String
+  departmentId      String
+  basicSalary       Float
+  housingAllowance  Float            @default(0)
+  transportAllowance Float           @default(0)
+  otherAllowances   Float            @default(0)
+  bankName          String?
+  bankAccountNumber String?
+  iban              String?
+  isActive          Boolean          @default(true)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  department Department @relation(fields: [departmentId], references: [id])
+
+  userId    String?  @unique
+  user      User?    @relation(fields: [userId], references: [id])
+
+  payrollItems PayrollItem[]
+  leaves       Leave[]
+  attendance   Attendance[]
+  salaryHistory SalaryHistory[]
+
+  @@map("employees")
+}
+
+model SalaryHistory {
+  id              String   @id @default(cuid())
+  basicSalary     Float
+  housingAllowance Float   @default(0)
+  transportAllowance Float  @default(0)
+  otherAllowances Float    @default(0)
+  effectiveDate   DateTime
+  reason          String?
+  createdAt       DateTime @default(now())
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("salary_history")
+}
+
+model Payroll {
+  id              String   @id @default(cuid())
+  payrollNumber   String   @unique
+  period          String   // e.g., "2024-01"
+  startDate       DateTime
+  endDate         DateTime
+  paymentDate     DateTime
+  totalEmployees  Int
+  totalAmount     Float
+  status          String   @default("PENDING") // PENDING, PROCESSED, PAID
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  payrollItems PayrollItem[]
+  wpsFiles     WPSFile[]
+
+  @@map("payrolls")
+}
+
+model PayrollItem {
+  id               String   @id @default(cuid())
+  basicSalary      Float
+  housingAllowance Float    @default(0)
+  transportAllowance Float  @default(0)
+  otherAllowances  Float    @default(0)
+  grossSalary      Float
+  deductions       Float    @default(0)
+  netSalary        Float
+  overtime         Float    @default(0)
+  bonus            Float    @default(0)
+  createdAt        DateTime @default(now())
+
+  payrollId   String
+  payroll     Payroll   @relation(fields: [payrollId], references: [id], onDelete: Cascade)
+
+  employeeId String
+  employee   Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("payroll_items")
+}
+
+model WPSFile {
+  id            String    @id @default(cuid())
+  fileName      String
+  filePath      String
+  fileHash      String?
+  submissionId  String?   // MOL submission reference
+  status        WPSStatus @default(PENDING)
+  totalAmount   Float
+  totalRecords  Int
+  submissionDate DateTime?
+  responseDate  DateTime?
+  errorMessage  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  payrollId String
+  payroll   Payroll @relation(fields: [payrollId], references: [id], onDelete: Cascade)
+
+  @@map("wps_files")
+}
+
+model Leave {
+  id          String       @id @default(cuid())
+  leaveNumber String       @unique
+  startDate   DateTime
+  endDate     DateTime
+  totalDays   Float
+  leaveType   LeaveType
+  reason      String?
+  status      LeaveStatus  @default(PENDING)
+  approvedBy  String?
+  approvedAt  DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("leaves")
+}
+
+model Attendance {
+  id          String   @id @default(cuid())
+  date        DateTime
+  checkIn     DateTime?
+  checkOut    DateTime?
+  workingHours Float?
+  overtime    Float    @default(0)
+  status      String   // PRESENT, ABSENT, LATE, HALF_DAY
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, date])
+  @@map("attendance")
+}
