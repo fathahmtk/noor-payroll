@@ -1,0 +1,12 @@
+# Railway Deployment Commands
+
+# Correct Railway CLI usage:
+npx @railway/cli login
+npx @railway/cli up
+
+# Or shorter:
+npx @railway/cli login
+npx @railway/cli up
+
+# Alternative - Railway CLI has different commands:
+npx @railway/cli --help

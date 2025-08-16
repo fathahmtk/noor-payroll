@@ -1,0 +1,41 @@
+# Edge Configuration for Noor Payroll
+# Add these values to your Vercel Edge Config dashboard
+
+# Application Settings
+app_name = "Noor Payroll"
+app_version = "1.0.0"
+maintenance_mode = false
+
+# WPS Configuration
+wps_enabled = true
+wps_bank_codes = "QNB,CBQ,DBQ,QIB,IBQ,DCB,AHB,SCB,STB,BIB"
+wps_sif_format = "qatar_central_bank"
+
+# Qatar-specific Settings
+qatar_currency = "QAR"
+qatar_timezone = "Asia/Qatar"
+qatar_bank_list = "QNB,CBQ,DBQ,QIB,IBQ,DCB,AHB,SCB,STB,BIB"
+
+# Security Settings
+rate_limit_enabled = true
+session_timeout = 3600
+
+# Feature Flags
+enable_dashboard = true
+enable_reports = true
+enable_sif_generation = true
+
+# Bank Configuration
+bank_api_timeout = 30
+bank_retry_count = 3
+bank_webhook_enabled = true
+
+# WPS File Settings
+sif_file_retention_days = 90
+sif_auto_backup = true
+sif_encryption_enabled = true
+
+# User Settings
+max_employees_per_company = 1000
+max_payroll_records = 10000
+user_session_timeout = 7200

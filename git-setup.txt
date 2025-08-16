@@ -1,0 +1,12 @@
+# Git Configuration Setup Commands
+
+# Set up your git identity (replace with your actual email and name)
+git config --global user.email "noordigital@example.com"
+git config --global user.name "Noor Digital"
+
+# Check current git configuration
+git config --global --list
+
+# If you want to set up identity only for this repository (remove --global)
+git config user.email "noordigital@example.com"
+git config user.name "Noor Digital"

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import { TenantProvider } from "@/contexts/tenant-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,21 +15,21 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Z.ai Code Scaffold - AI-Powered Development",
-  description: "Modern Next.js scaffold optimized for AI-powered development with Z.ai. Built with TypeScript, Tailwind CSS, and shadcn/ui.",
-  keywords: ["Z.ai", "Next.js", "TypeScript", "Tailwind CSS", "shadcn/ui", "AI development", "React"],
-  authors: [{ name: "Z.ai Team" }],
+  title: "Noor Payroll - Multi-Tenant Payroll Management",
+  description: "Comprehensive payroll management system for Qatar businesses with multi-tenant architecture and WPS compliance.",
+  keywords: ["Noor Payroll", "Multi-Tenant", "WPS", "Payroll", "Qatar", "Next.js"],
+  authors: [{ name: "Noor Digital Team" }],
   openGraph: {
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
-    url: "https://chat.z.ai",
-    siteName: "Z.ai",
+    title: "Noor Payroll - Multi-Tenant Payroll Management",
+    description: "Comprehensive payroll management for Qatar businesses",
+    url: "https://noor-payroll.vercel.app",
+    siteName: "Noor Payroll",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
+    title: "Noor Payroll - Multi-Tenant Payroll Management",
+    description: "Comprehensive payroll management for Qatar businesses",
   },
 };
 
@@ -42,8 +43,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
-        {children}
-        <Toaster />
+        <TenantProvider>
+          {children}
+          <Toaster />
+        </TenantProvider>
       </body>
     </html>
   );
